@@ -1,0 +1,22 @@
+---
+    - name: "install apache server"
+      yum:
+        name: httpd
+        state: latest
+    - name: "install sql server"
+      yum:
+        name: "{{packages}}"
+        state: present
+      vars:
+        packages:
+         - mariadb
+         - mariadb-server
+    - name: "install php"
+      yum:
+        name: "{{packages}}"
+        state: latest
+      vars:
+        packages:
+         - php
+         - php-mysql
+         - MySQL-python

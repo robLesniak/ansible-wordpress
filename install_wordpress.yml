@@ -1,0 +1,37 @@
+---
+- hosts: wordpress_nodes
+  become: yes
+  vars:
+   wordpress_path: /var/www/wordpress
+   name_of_project: wordpress
+  tasks:
+    - include_tasks: tasks/os-depedencies.yml
+    - include_tasks: tasks/wp-install.yml
+
+
+    - name: "Start service mariadb, if not started"
+      service:
+        name: mariadb
+        state: started
+    - name: "Create a new database with name name_of_project"
+      mysql_db:
+        name: "{{name_of_project}}"
+        state: present
+    - name: "Create user with name user_name_of_project"
+      mysql_user:
+        name: "{{name_of_project}}"
+        password: 12345
+        priv: '*.*:ALL,GRANT'
+        state: present
+    - name: "copy apache cfg"
+      template:
+        src: templates/blog.conf
+        dest: /etc/httpd/conf.d/blog.conf
+    - name: "Start service httpd, if not started"
+      service:
+        name: httpd
+        state: restarted
+    - name: "copy wp-cofnig.php"
+      copy:
+        src: templates/wp-config.php
+        dest: "{{wordpress_path}}"
